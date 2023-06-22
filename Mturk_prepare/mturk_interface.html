@@ -1,0 +1,160 @@
+<script src="https://assets.crowd.aws/crowd-html-elements.js"></script>
+
+<!-- {'label': 'toxicity', 'shortDisplayName': 'tox', 'fullDisplayName': 'Toxicity'},
+{'label': 'identity_attack', 'shortDisplayName': 'id', 'fullDisplayName': 'Identity Attack'},
+{'label': 'threat', 'shortDisplayName': 'thrt', 'fullDisplayName': 'Threat'},
+{'label': 'profanity', 'shortDisplayName': 'prof', 'fullDisplayName': 'Profanity'},
+{'label': 'insult', 'shortDisplayName': 'ins', 'fullDisplayName': 'Insult'},
+{'label': 'sexually_explicit', 'shortDisplayName': 'sex', 'fullDisplayName': 'Sexually Explicit'} -->
+
+<div id="errorBox"></div>
+<crowd-entity-annotation
+  name="crowd-entity-annotation"
+  header="Highlight parts of the text that are problematic below"
+  labels="[
+        {'label': 'problematic', 'shortDisplayName': 'prob', 'fullDisplayName': 'Problematic Text'},
+      ]"
+  text="${comment_text}"
+>
+  <full-instructions header="Named entity recognition instructions">
+    <ol>
+      <li><strong>Read</strong> the text carefully.</li>
+      <li>
+        <strong>Highlight</strong> words, phrases, or sections of the text.
+      </li>
+      <li>
+        <strong>Choose</strong> the label that best matches what you have
+        highlighted.
+      </li>
+      <li>
+        To <strong>change</strong> a label, choose highlighted text and select a
+        new label.
+      </li>
+      <li>
+        To <strong>remove</strong> a label from highlighted text, choose the X
+        next to the abbreviated label name on the highlighted text.
+      </li>
+      <li>
+        You can select all of a previously highlighted text, but not a portion
+        of it.
+      </li>
+    </ol>
+  </full-instructions>
+
+  <short-instructions> Apply labels to words or phrases. </short-instructions>
+
+  <div id="additionalQuestions" style="margin-top: 20px">
+    <h3>*Is the text safe?</h3>
+    <p>
+      If the text contains one or more perspectives in the table (toxicity,
+      identify attack, threat, profanity, insult, sexually explicit), we define
+      it as “unsafe”. Refer to the table for detailed descriptions and examples.
+    </p>
+    <crowd-card style="width: 100%; padding: 24px">
+      <div class="card">${comment_text}</div>
+    </crowd-card>
+
+    <crowd-radio-group>
+      <crowd-radio-button name="safe" value="checked">Safe</crowd-radio-button>
+      <crowd-radio-button name="unsafe" value="checked"
+        >Unsafe</crowd-radio-button
+      >
+      <crowd-radio-button name="uncertain" value="checked"
+        >Uncertain</crowd-radio-button
+      >
+    </crowd-radio-group>
+
+    <div style="flex: 1">
+      <img
+        src="https://i.ibb.co/QXFBQRJ/Xnip2023-06-18-15-52-00.jpg"
+        alt="Code explanation"
+        style="width: 50%; min-width: 428px"
+      />
+    </div>
+  </div>
+
+  <div id="safetyCategory" style="margin: 20px 0px">
+    <h3>*Does the text contain any of the following issue?</h3>
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <crowd-checkbox name="toxicity" value="checked">Toxicity</crowd-checkbox>
+      <crowd-checkbox name="identity_attack" value="checked"
+        >Identity Attack</crowd-checkbox
+      >
+      <crowd-checkbox name="threat" value="checked">Threat</crowd-checkbox>
+      <crowd-checkbox name="profanity" value="checked"
+        >Profanity</crowd-checkbox
+      >
+      <crowd-checkbox name="insult" value="checked">Insult</crowd-checkbox>
+      <crowd-checkbox name="sexually_explicit" value="checked"
+        >Sexually Explicit</crowd-checkbox
+      >
+      <crowd-checkbox name="none" value="checked"
+        >None of the above</crowd-checkbox
+      >
+    </div>
+  </div>
+
+  <crowd-form></crowd-form>
+</crowd-entity-annotation>
+
+<script>
+  document.addEventListener("all-crowd-elements-ready", () => {
+    document
+      .querySelector("crowd-entity-annotation")
+      .shadowRoot.querySelector("crowd-form")
+      .form.prepend(safetyCategory);
+
+    document
+      .querySelector("crowd-entity-annotation")
+      .shadowRoot.querySelector("crowd-form")
+      .form.prepend(additionalQuestions);
+
+    function validateRadio() {
+      var valid = true;
+      var radioGroups = document
+        .querySelector("crowd-entity-annotation")
+        .shadowRoot.querySelectorAll("crowd-radio-group");
+
+      for (var i = 0; i < radioGroups.length; i++) {
+        var validGroup = false;
+        var radioButtons = radioGroups[i].children;
+        for (var j = 0; j < radioButtons.length; j++) {
+          validGroup = validGroup || radioButtons[j].checked;
+        }
+        valid = valid && validGroup;
+      }
+      return valid;
+    }
+
+    function validateCheckbox() {
+      var valid = false;
+      var checkboxes = document
+        .querySelector("crowd-entity-annotation")
+        .shadowRoot.querySelectorAll("crowd-checkbox");
+
+      for (var i = 0; i < checkboxes.length; i++) {
+        valid = valid || checkboxes[i].checked;
+      }
+      console.log(valid);
+      return valid;
+    }
+
+    document
+      .querySelector("crowd-entity-annotation")
+      .shadowRoot.querySelector("crowd-form").onsubmit = function (e) {
+      const output = document
+        .querySelector("crowd-entity-annotation")
+        .shadowRoot.querySelector("crowd-form").form;
+
+      const radioValid = validateRadio();
+      const checkboxValid = validateCheckbox();
+      
+      if (!radioValid || !checkboxValid) {
+        e.preventDefault()
+
+        errorBox.innerHTML = '<crowd-alert type="error" dismissible>You must complete all of the three questions.</crowd-alert>';
+        errorBox.scrollIntoView();
+      }
+    };
+  });
+</script>
