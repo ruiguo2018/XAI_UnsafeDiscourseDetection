@@ -4,8 +4,8 @@
 
 ./Data                --> Contains the dataset related files.
 
-./Models              --> Contains the codes for all the classifiers used
+./Codes              --> Contains the codes used
 
-./Preprocess  	      --> Contains the codes for preprocessing the dataset	
+./Mturk_prepare  	      --> Contains the info for Mturk	
 
 ./best_model_json     --> Contains the parameter values for the best models
